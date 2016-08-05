@@ -23,7 +23,7 @@ case class ClientSession(
    url: String,
    id: String,
    token: String,
-   cookie: String,
+   var cookie: String,
    create_at: LocalDateTime,
    update_dat: LocalDateTime,
    delete_at: LocalDateTime,
@@ -48,24 +48,11 @@ case class ClientSession(
      * @return  All the teams the user belongs to.
      *          TODO: Maybe all the teams are actually returned… must be tested
      */
-   def teams(): Seq[Team] =
+   def teams: Seq[Team] =
    {
-      val path = s"""${url}/api/v3/users/initial_load"""
-
-      val client = HttpClientBuilder.create()
-         .setRedirectStrategy(new LaxRedirectStrategy())
-         .build()
-
-      val request = new HttpGet(path)
-      request.addHeader("Cookie", cookie)
-
-      val answer = client.execute(request)
-
-      val document = Source.fromInputStream(answer.getEntity.getContent)
-         .getLines.mkString("")
-         .parseJson
-         .asJsObject
-         .fields
+      val document = RestUtils.get_query(this, "api/v3/users/initial_load")
+                              .asJsObject
+                              .fields
 
       document("teams") match
       {
@@ -91,7 +78,7 @@ case class ClientSession(
       }
    }
 
-   def profiles(): Seq[Profile] =
+   def profiles: Seq[Profile] =
    {
       val path = s"""${url}/api/v3/users/initial_load"""
 
