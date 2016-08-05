@@ -27,7 +27,7 @@ case class Team(  id: String,
      * @param session The session that must be used for submitting queries.
      * @return the channels associated to this team.
      */
-   def channels(session: ClientSession): Seq[Channel] =
+   def channels(implicit session: ClientSession): Seq[Channel] =
    {
       RestUtils.get_query(session, s"/api/v3/teams/${id}/channels/").asJsObject.fields("channels") match {
          case JsArray(channels) => channels.map(channel => {
@@ -52,4 +52,19 @@ case class Team(  id: String,
          })
       }
    }
+
+   /**
+     * @param session The session that must be used for submitting queries.
+     * @param name The name of a channel
+     * @return All the channels that belong to this team and having the specified name
+     */
+   def channels(name: String)(implicit session: ClientSession): Seq[Channel] = channels(session).filter(_.name == name)
+
+   /**
+     * @param session The session that must be used for submitting queries.
+     * @param name The name of a channel.
+     * @return The first channel the name of which corresponds to the researched one, or None if
+     *         no channel corresponds.
+     */
+   def channel(name: String)(implicit session: ClientSession) = channels(name)(session).headOption
 }

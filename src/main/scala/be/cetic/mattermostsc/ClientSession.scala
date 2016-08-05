@@ -78,6 +78,19 @@ case class ClientSession(
       }
    }
 
+   /**
+     * @param name The name of a team.
+     * @return All the team, the names of which correspond to the specified one.
+     */
+   def teams(name: String): Seq[Team] = teams.filter(_.name == name)
+
+   /**
+     * @param name The name of a team.
+     * @return The first team the name of which corresponds to the researched one, or None if
+     *         no team corresponds.
+     */
+   def team(name: String) = teams(name).headOption
+
    def profiles: Seq[Profile] =
    {
       val path = s"""${url}/api/v3/users/initial_load"""

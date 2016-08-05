@@ -29,7 +29,7 @@ case class Profile(  id: String,
      * @param session The session that must be used for submitting queries.
      * @return The current status of this profile
      */
-   def status(session: ClientSession): String =
+   def status(implicit session: ClientSession): String =
    {
       val path = "api/v3/users/status"
       val params = Seq(this.id).toJson
