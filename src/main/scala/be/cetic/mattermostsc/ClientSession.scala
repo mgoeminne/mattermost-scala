@@ -69,7 +69,10 @@ case class ClientSession(
                new LocalDateTime(data("update_at").convertTo[Long]),
                data("allowed_domains").convertTo[String],
                data("invite_id").convertTo[String],
-               new LocalDateTime(data("delete_at").convertTo[Long]),
+               data("delete_at").convertTo[Long] match {
+                  case 0 => None
+                  case date => Some(new LocalDateTime(data("delete_at").convertTo[Long]))
+               },
                new LocalDateTime(data("create_at").convertTo[Long]),
                data("type").convertTo[String],
                data("allow_open_invite").convertTo[Boolean]
@@ -129,7 +132,10 @@ case class ClientSession(
                data("roles").convertTo[String],
                data("locale").convertTo[String],
                data("auth_data").convertTo[String],
-               new LocalDateTime(data("delete_at").convertTo[Long])
+               data("delete_at").convertTo[Long] match {
+                  case 0 => None
+                  case date => Some(new LocalDateTime(data("delete_at").convertTo[Long]))
+               }
             )
          }).toSeq
    }

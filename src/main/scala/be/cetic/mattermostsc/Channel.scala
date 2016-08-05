@@ -13,7 +13,7 @@ import scala.collection.Iterable
 case class Channel(id: String,
                    create_at: LocalDateTime,
                    update_at: LocalDateTime,
-                   delete_at: LocalDateTime,
+                   delete_at: Option[LocalDateTime],
                    team_id: String,
                    `type`: String,
                    display_name: String,

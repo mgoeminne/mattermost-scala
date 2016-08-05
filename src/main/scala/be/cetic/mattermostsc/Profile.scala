@@ -23,7 +23,7 @@ case class Profile(  id: String,
                      roles: String,
                      locale: String,
                      auth_data: String,
-                     delete_at: LocalDateTime)
+                     delete_at: Option[LocalDateTime])
 {
    /**
      * @param session The session that must be used for submitting queries.

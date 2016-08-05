@@ -17,7 +17,7 @@ case class Team(  id: String,
                   update_at: LocalDateTime,
                   allowed_domains: String,
                   invite_id: String,
-                  delete_at: LocalDateTime,
+                  delete_at: Option[LocalDateTime],
                   create_at: LocalDateTime,
                   `type`: String,
                   allow_open_invite: Boolean
@@ -37,7 +37,10 @@ case class Team(  id: String,
                fields("id").convertTo[String],
                new LocalDateTime(fields("create_at").convertTo[Long]),
                new LocalDateTime(fields("update_at").convertTo[Long]),
-               new LocalDateTime(fields("delete_at").convertTo[Long]),
+               fields("delete_at").convertTo[Long] match {
+                  case 0 => None
+                  case date => Some(new LocalDateTime(date))
+               },
                fields("team_id").convertTo[String],
                fields("type").convertTo[String],
                fields("display_name").convertTo[String],
