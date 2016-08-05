@@ -26,7 +26,7 @@ case class Profile(  id: String,
                      delete_at: LocalDateTime)
 {
    /**
-     * @param session The session that must be used for submitting the query.
+     * @param session The session that must be used for submitting queries.
      * @return The current status of this profile
      */
    def status(session: ClientSession): String =
