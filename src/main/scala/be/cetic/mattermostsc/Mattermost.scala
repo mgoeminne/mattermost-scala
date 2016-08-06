@@ -60,7 +60,7 @@ object Mattermost
                                  .asJsObject
                                  .fields
 
-            Some(ClientSession(
+            val client = Client(
                path.toString,
                document("id").convertTo[String],
                headers("Token"),
@@ -84,7 +84,9 @@ object Mattermost
                new LocalDateTime(document("last_password_update").convertTo[Long]),
                new LocalDateTime(document("last_picture_update").convertTo[Long]),
                document("locale").convertTo[String]
-            ))
+            )
+
+            client.team(team).map(t => ClientSession(client, t))
          }
          case _ => None
       }

@@ -1,10 +1,6 @@
 package be.cetic.mattermostsc
 
-import org.apache.http.client.methods.HttpGet
-import org.apache.http.impl.client.{HttpClientBuilder, LaxRedirectStrategy}
 import org.joda.time.LocalDateTime
-
-import scala.io.Source
 
 import spray.json._
 import DefaultJsonProtocol._
@@ -34,7 +30,7 @@ case class Profile(  id: String,
       val path = "api/v3/users/status"
       val params = Seq(this.id).toJson
 
-      val answer = RestUtils.post_query(session, path, params)
+      val answer = RestUtils.post_query(session.client, path, params)
                             .asJsObject
                             .fields
 

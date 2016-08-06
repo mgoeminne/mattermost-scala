@@ -1,11 +1,15 @@
 package be.cetic.mattermostsc
 
-import org.joda.time.LocalDateTime
+import java.io.File
+
+import org.joda.time.{DateTime, DateTimeZone, LocalDateTime}
 import spray.json.JsArray
 import spray.json._
 import DefaultJsonProtocol._
 
 import scala.collection.Iterable
+import spray.json._
+import DefaultJsonProtocol._
 
 /**
   * A channel is a place where messages can be sent and received.
@@ -39,7 +43,7 @@ case class Channel(id: String,
       def postsInPage(page: Int): Iterable[Post] =
       {
          val path = s"api/v3/teams/${team_id}/channels/${id}/posts/page/${page}/${items_per_page}"
-         val answer = RestUtils.get_query(session, path)
+         val answer = RestUtils.get_query(session.client, path)
                                .asJsObject
                                .fields
 
@@ -86,4 +90,36 @@ case class Channel(id: String,
 
       rec_posts(0)
    }
+
+
+   /**
+     * Sends a message to a particular channel.
+     * @param message The message to send.
+     * @param files   Optional messages that can be joined to the message.
+     * @param session The session that must be used for submitting queries.
+     */
+   def send(message: String, files: Seq[File] = Seq())(implicit session: ClientSession) =
+   {
+      val filenames = files.map(file => upload(file))
+
+      val path = s"api/v3/teams/${team_id}/channels/${id}/posts/create"
+      val now = DateTime.now(DateTimeZone.UTC).getMillis
+
+      RestUtils.post_query(session.client, path, Map(
+         "channel_id" -> id.toJson,
+         "create_at" -> now.toJson,
+         "filenames" -> filenames.toJson,
+         "message" -> message.toJson,
+         "pending_post_id" -> (session.client.id + ":" + now).toJson,
+         "user_id" -> session.client.id.toJson
+      ).toJson)
+   }
+
+   /**
+     * Uploads a file for this channel.
+     * @param file The file to share.
+     * @param session The session that must be used for submitting queries.
+     * @return The path of the file on the Mattermost server.
+     */
+   def upload(file: File)(implicit session: ClientSession) = RestUtils.post_file(session.client, this, file)
 }

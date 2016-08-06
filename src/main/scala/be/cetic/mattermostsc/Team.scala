@@ -2,7 +2,6 @@ package be.cetic.mattermostsc
 
 import org.joda.time.LocalDateTime
 import spray.json.JsArray
-
 import spray.json._
 import DefaultJsonProtocol._
 
@@ -29,7 +28,7 @@ case class Team(  id: String,
      */
    def channels(implicit session: ClientSession): Seq[Channel] =
    {
-      RestUtils.get_query(session, s"/api/v3/teams/${id}/channels/").asJsObject.fields("channels") match {
+      RestUtils.get_query(session.client, s"/api/v3/teams/${id}/channels/").asJsObject.fields("channels") match {
          case JsArray(channels) => channels.map(channel => {
             val fields = channel.asJsObject.fields
 
