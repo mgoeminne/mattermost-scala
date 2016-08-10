@@ -94,7 +94,7 @@ case class Client(
      */
    def team(name: String) = teams(name).headOption
 
-   def profiles: Seq[Profile] =
+   def profiles: Seq[CompleteProfile] =
    {
       val path = s"""${url}/api/v3/users/initial_load"""
 
@@ -116,27 +116,7 @@ case class Client(
       document("direct_profiles")
          .asJsObject
          .fields
-         .map(field =>
-         {
-            val data = field._2.asJsObject.fields
-
-            new Profile(
-               data("id").convertTo[String],
-               data("first_name").convertTo[String],
-               data("last_name").convertTo[String],
-               data("username").convertTo[String],
-               data("nickname").convertTo[String],
-               data("email").convertTo[String],
-               new LocalDateTime(data("create_at").convertTo[Long]),
-               new LocalDateTime(data("last_activity_at").convertTo[Long]),
-               data("roles").convertTo[String],
-               data("locale").convertTo[String],
-               data("auth_data").convertTo[String],
-               data("delete_at").convertTo[Long] match {
-                  case 0 => None
-                  case date => Some(new LocalDateTime(data("delete_at").convertTo[Long]))
-               }
-            )
-         }).toSeq
+         .map(field => CompleteProfile(field._2.asJsObject))
+         .toSeq
    }
 }

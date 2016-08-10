@@ -31,10 +31,12 @@ case class Channel(id: String,
 {
    //TODO: set a header
    //TODO: Invite others to this channel
+   //TODO: List members
+
 
    /**
      * @param session The session that must be used for submitting queries.
-     * @return the posts associated to the channel, by decreasing temporal order (the last post first).
+     * @return the posts associated to the channel, ordered anti-chronologically (the last post first).
      */
    def posts(implicit session: ClientSession): Stream[Post] =
    {
@@ -116,10 +118,25 @@ case class Channel(id: String,
    }
 
    /**
-     * Uploads a file for this channel.
+     * Uploads a file to this channel.
      * @param file The file to share.
      * @param session The session that must be used for submitting queries.
      * @return The path of the file on the Mattermost server.
      */
    def upload(file: File)(implicit session: ClientSession) = RestUtils.post_file(session.client, this, file)
+
+
+   /**
+     * @param session The session that must be used for submitting queries.
+     * @return The members who subscribed to this channel.
+     */
+   def members(implicit session: ClientSession): Seq[PartialProfile] =
+   {
+      RestUtils.get_query(
+         session.client,
+         s"api/v3/teams/${team_id}/channels/${id}/extra_info"
+      ).asJsObject.fields("members") match {
+         case JsArray(l) => l.map(member => PartialProfile(member.asJsObject)(session))
+      }
+   }
 }

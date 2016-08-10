@@ -1,8 +1,9 @@
 package be.cetic.mattermostsc
 
 import java.io.InputStream
+import java.net.URL
 
-import org.joda.time.LocalDateTime
+import org.joda.time.{DateTime, DateTimeZone, LocalDateTime}
 
 /**
   * A post sent in a channel.
@@ -24,7 +25,7 @@ case class Post(  id: String,
                   pending_post_id: String
                )
 {
-   def user: Option[Profile] = user_id match {
+   def user: Option[CompleteProfile] = user_id match {
       case "" => None
       case id => ???
    }
@@ -47,6 +48,12 @@ case class Post(  id: String,
    }
 
    /**
+     * @param session
+     * @return All the posts that are considered as answers to this post.
+     */
+   def children(implicit session: ClientSession): Stream[Post] = ???
+
+   /**
      * @param session The session that must be used for submitting queries.
      * @return A list of the name of attached files, as well as direct url for downloading them.
      */
@@ -57,4 +64,7 @@ case class Post(  id: String,
          s"${session.client.url}/api/v3/teams/${this.channel.team_id}/files/get/${name}")
       )
    }
+
+   def avatar(implicit session: ClientSession): URL =
+      new URL(s"${session.client.url}/api/v3/users/${user_id}/image?time=${DateTime.now(DateTimeZone.UTC).getMillis}")
 }
