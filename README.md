@@ -97,7 +97,7 @@ channel.send(
 Optionally, you could be interested in simply submitting files to Mattermost.
 
 ```scala
-val url = channel.upload(new File("/foo/bar.png")
+val url = channel.upload(new File("/foo/bar.png"))
 ```
 
 The resulting URL is the place where users can retrieve the submitted file.
