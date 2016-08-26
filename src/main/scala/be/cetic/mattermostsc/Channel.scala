@@ -48,14 +48,10 @@ case class Channel(id: String,
                    creator_id: String)
 {
    // TODO: Invite others to this channel
-   // TODO: List members
-   // TODO leave channel
 
-
-   // If admnistrateur of the channel
-   // TODO View info
-   // TODO Add members
-   // TODO Manage members (== invite others?)
+   // If channel administrator
+   // TODO Add members (== invite others?)
+   // TODO Manage members
    // TODO rename channel
 
 
@@ -217,6 +213,14 @@ case class Channel(id: String,
 
       RestUtils.post_query(session.client, s"api/v3/teams/${session.team.id}/channels/update_purpose", params)
    }
+
+   /**
+     * Forces the client to leave the channel.
+     *
+     * @param session The session that must be used for submitting queries.
+     */
+   def leave()(implicit session: ClientSession): Unit =
+      RestUtils.post_query(session.client, s"api/v3/teams/${session.team.id}/channels/${this.id}/leave", JsNull)
 }
 
 object Channel
