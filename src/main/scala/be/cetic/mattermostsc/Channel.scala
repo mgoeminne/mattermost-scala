@@ -47,9 +47,19 @@ case class Channel(id: String,
                    extra_update_at: LocalDateTime,
                    creator_id: String)
 {
-   //TODO: set a header
-   //TODO: Invite others to this channel
-   //TODO: List members
+   // TODO: set a header
+   // TODO set channel purpose
+   // TODO: Invite others to this channel
+   // TODO: List members
+   // TODO leave channel
+
+
+   // If admnistrateur of the channel
+   // TODO View info
+   // TODO Add members
+   // TODO Manage members (== invite others?)
+   // TODO rename channel
+
 
 
    /**
@@ -162,6 +172,27 @@ case class Channel(id: String,
      * @return true if this is a private (active) channel, false otherwise.
      */
    def is_private = this.`type` == "P"
+
+   /**
+     * @param session The session that must be used for submitting queries.
+     * @return true if the client is the owner of this channel; false otherwise.
+     */
+   def is_mine(implicit session: ClientSession) = creator_id == session.client.id
+
+   /**
+     * Tries to delete the channel.
+     * Only works if the client is the owner (or an admin).
+     *
+     * @param session The session that must be used for submitting queries.
+     * @return true if the channel has been successfully deleted; false otherwise
+     */
+   def delete(implicit session: ClientSession): Boolean =
+   {
+      val ret = RestUtils.post_query(session.client, s"api/v3/teams/${session.team.id}/channels/${this.id}/delete", JsNull)
+                         .asJsObject
+
+      ret.fields.keySet == Set("id")
+   }
 }
 
 object Channel
