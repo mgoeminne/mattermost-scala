@@ -25,7 +25,7 @@ import DefaultJsonProtocol._
   *  - D for "direct"
   * @param display_name
   * @param name
-  * @param header
+  * @param _header
   * @param purpose
   * @param last_post_at
   * @param total_msg_count
@@ -40,7 +40,7 @@ case class Channel(id: String,
                    `type`: String,
                    display_name: String,
                    name: String,
-                   header: String,
+                   private var _header: String,
                    purpose: String,
                    last_post_at: LocalDateTime,
                    total_msg_count: Long,
@@ -192,6 +192,19 @@ case class Channel(id: String,
                          .asJsObject
 
       ret.fields.keySet == Set("id")
+   }
+
+   def header = _header
+   def header_=(content: String)(implicit session: ClientSession)
+   {
+      _header = content
+
+      val params = Map(
+         "channel_header" -> content,
+         "channel_id" -> this.id
+      ).toJson
+
+      RestUtils.post_query(session.client, s"api/v3/teams/${session.team.id}/channels/update_header", params)
    }
 }
 
