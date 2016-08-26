@@ -31,19 +31,20 @@ class Profile(val id: String,
 
    /**
      * @param session The session that must be used for submitting queries.
-     * @return The direct channel shared with this profile, if such a channel exists.
+     * @return true if a direct channel already exists for this profile, false otherwise.
      */
-   def direct_channel(implicit session: ClientSession): Option[Channel] = session.channel(session.client.id + "__" + this.id)
+   def has_channel(implicit session: ClientSession): Boolean = session.channel(session.client.id + "__" + this.id) match {
+      case existing: Some[Channel] => true
+      case _ => false
+   }
 
    /**
-     * Creates a direct channel with this profile, if such a channel does not exist.
      * @param session The session that must be used for submitting queries.
-     * @return The existing direct channel shared with this profile, if such a channel exist,
-     *         or the freshly created direct channel shared with this profile, otherwise.
+     * @return The direct channel shared with this profile. This channel is created if required.
      */
-   def create_direct_channel(implicit session: ClientSession): Channel =
+   def direct_channel(implicit session: ClientSession): Channel =
    {
-      direct_channel match {
+      session.channel(session.client.id + "__" + this.id) match {
          case Some(existing) => existing
          case None => {
             val params = Map(
@@ -58,9 +59,7 @@ class Profile(val id: String,
 
             Channel(ret.asJsObject)
          }
-
       }
-
    }
 
    override def toString = username
