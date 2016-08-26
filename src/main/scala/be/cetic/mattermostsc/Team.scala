@@ -28,9 +28,15 @@ case class Team(  id: String,
      */
    def channels(implicit session: ClientSession): Seq[Channel] =
    {
-      RestUtils.get_query(session.client, s"/api/v3/teams/${id}/channels/").asJsObject.fields("channels") match {
+      val regular = RestUtils.get_query(session.client, s"/api/v3/teams/${id}/channels/").asJsObject.fields("channels") match {
          case JsArray(channels) => channels.map(channel => Channel(channel.asJsObject))
       }
+
+      val more = RestUtils.get_query(session.client, s"/api/v3/teams/${id}/channels/more").asJsObject.fields("channels") match {
+         case JsArray(channels) => channels.map(channel => Channel(channel.asJsObject))
+      }
+
+      regular ++ more
    }
 
    /**
