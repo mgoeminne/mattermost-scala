@@ -14,7 +14,7 @@ class Profile(val id: String,
 {
    /**
      * @param session The session that must be used for submitting queries.
-     * @return The current status of this profile
+     * @return The current status of this profile.
      */
    def status(implicit session: ClientSession): String =
    {

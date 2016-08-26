@@ -221,6 +221,14 @@ case class Channel(id: String,
      */
    def leave()(implicit session: ClientSession): Unit =
       RestUtils.post_query(session.client, s"api/v3/teams/${session.team.id}/channels/${this.id}/leave", JsNull)
+
+   /**
+     * Forces the client to join the channel.
+     *
+     * @param session The session that must be used for submitting queries.
+     */
+   def join()(implicit session: ClientSession): Unit =
+      RestUtils.post_query(session.client, s"api/v3/teams/${session.team.id}/channels/${this.id}/join", JsNull)
 }
 
 object Channel
