@@ -6,6 +6,67 @@ import org.joda.time.{DateTime, DateTimeZone, LocalDateTime}
 import spray.json._
 import DefaultJsonProtocol._
 
+class Profile(val id: String,
+              val nickname: String,
+              val email: String,
+              val roles: String,
+              val username: String)
+{
+   /**
+     * @param session The session that must be used for submitting queries.
+     * @return The current status of this profile
+     */
+   def status(implicit session: ClientSession): String =
+   {
+      val path = "api/v3/users/status"
+      val params = Seq(this.id).toJson
+
+      RestUtils.post_query(session.client, path, params)
+         .asJsObject
+         .fields(this.id).convertTo[String]
+   }
+
+   def avatar(implicit session: ClientSession): URL =
+      new URL(s"${session.client.url}/api/v3/users/${id}/image?time=${DateTime.now(DateTimeZone.UTC).getMillis}")
+
+   /**
+     * @param session The session that must be used for submitting queries.
+     * @return The direct channel shared with this profile, if such a channel exists.
+     */
+   def direct_channel(implicit session: ClientSession): Option[Channel] = session.channel(session.client.id + "__" + this.id)
+
+   /**
+     * Creates a direct channel with this profile, if such a channel does not exist.
+     * @param session The session that must be used for submitting queries.
+     * @return The existing direct channel shared with this profile, if such a channel exist,
+     *         or the freshly created direct channel shared with this profile, otherwise.
+     */
+   def create_direct_channel(implicit session: ClientSession): Channel =
+   {
+      direct_channel match {
+         case Some(existing) => existing
+         case None => {
+            val params = Map(
+               "user_id" -> this.id
+            ).toJson
+
+            val ret = RestUtils.post_query(
+               session.client,
+               s"api/v3/teams/${session.team.id}/channels/create_direct",
+               params
+            )
+
+            Channel(ret.asJsObject)
+         }
+
+      }
+
+   }
+
+   override def toString = username
+}
+
+
 /**
   * A profile that directly contains all the informations that relate to other members.
   * @param id
@@ -21,51 +82,36 @@ import DefaultJsonProtocol._
   * @param auth_data
   * @param delete_at
   */
-case class CompleteProfile(id: String,
-                           first_name: String,
-                           last_name: String,
-                           username: String,
-                           nickname: String,
-                           email: String,
-                           created_at: LocalDateTime,
-                           last_activity_at: LocalDateTime,
-                           roles: String,
-                           locale: String,
-                           auth_data: String,
-                           delete_at: Option[LocalDateTime])
+class CompleteProfile(id: String,
+                      val first_name: String,
+                      val last_name: String,
+                      username: String,
+                      nickname: String,
+                      email: String,
+                      val created_at: LocalDateTime,
+                      val last_activity_at: LocalDateTime,
+                      roles: String,
+                      val locale: String,
+                      val auth_data: String,
+                      val delete_at: Option[LocalDateTime]) extends Profile(id, nickname, email, roles, username)
 {
    /**
-     * @param session The session that must be used for submitting queries.
-     * @return The current status of this profile
+     * @return true if the profile is still active on the server, false otherwise.
      */
-   def status(implicit session: ClientSession): String =
-   {
-      val path = "api/v3/users/status"
-      val params = Seq(this.id).toJson
-
-      RestUtils.post_query(session.client, path, params)
-               .asJsObject
-               .fields(this.id).convertTo[String]
+   def is_active = delete_at match {
+      case None => true
+      case _ => false
    }
-
-   def avatar(implicit session: ClientSession): URL =
-      new URL(s"${session.client.url}/api/v3/users/${id}/image?time=${DateTime.now(DateTimeZone.UTC).getMillis}")
 }
 
-case class PartialProfile(id: String,
-                          nickname: String,
-                          email: String,
-                          roles: String,
-                          username: String)(implicit session: ClientSession)
 
-
-object PartialProfile
+object Profile
 {
    def apply(obj: JsObject)(implicit session: ClientSession) =
    {
       val data = obj.fields
 
-      new PartialProfile(
+      new Profile(
          data("id").convertTo[String],
          data("nickname").convertTo[String],
          data("email").convertTo[String],
@@ -74,6 +120,7 @@ object PartialProfile
       )
    }
 }
+
 
 object CompleteProfile
 {

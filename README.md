@@ -62,7 +62,7 @@ val channelsBis: Seq[Channel] = session.channels("off-topic") // Returns all the
 val channel: Option[Channel] = session.channel("off-topic") // Returns one of the public channels, the name of which is "off-topic", if any.
 ```
 
-## Interacting with channel
+## Interacting with channels
 
 After you selected a channel, you probably want to retrieve the last messages that have been published in it. 
 

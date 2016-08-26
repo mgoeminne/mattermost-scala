@@ -13,6 +13,24 @@ import DefaultJsonProtocol._
 
 /**
   * A channel is a place where messages can be sent and received.
+  *
+  * @param id
+  * @param create_at
+  * @param update_at
+  * @param delete_at
+  * @param team_id
+  * @param `type`
+  *  - P for "private"
+  *  - O for "open" (public)
+  *  - D for "direct"
+  * @param display_name
+  * @param name
+  * @param header
+  * @param purpose
+  * @param last_post_at
+  * @param total_msg_count
+  * @param extra_update_at
+  * @param creator_id
   */
 case class Channel(id: String,
                    create_at: LocalDateTime,
@@ -130,13 +148,13 @@ case class Channel(id: String,
      * @param session The session that must be used for submitting queries.
      * @return The members who subscribed to this channel.
      */
-   def members(implicit session: ClientSession): Seq[PartialProfile] =
+   def members(implicit session: ClientSession): Seq[Profile] =
    {
       RestUtils.get_query(
          session.client,
          s"api/v3/teams/${team_id}/channels/${id}/extra_info"
       ).asJsObject.fields("members") match {
-         case JsArray(l) => l.map(member => PartialProfile(member.asJsObject)(session))
+         case JsArray(l) => l.map(member => Profile(member.asJsObject)(session))
       }
    }
 
@@ -144,4 +162,32 @@ case class Channel(id: String,
      * @return true if this is a private (active) channel, false otherwise.
      */
    def is_private = this.`type` == "P"
+}
+
+object Channel
+{
+   def apply(obj: JsObject) =
+   {
+      val fields = obj.fields
+
+      new Channel(
+         fields("id").convertTo[String],
+         new LocalDateTime(fields("create_at").convertTo[Long]),
+         new LocalDateTime(fields("update_at").convertTo[Long]),
+         fields("delete_at").convertTo[Long] match {
+            case 0 => None
+            case date => Some(new LocalDateTime(date))
+         },
+         fields("team_id").convertTo[String],
+         fields("type").convertTo[String],
+         fields("display_name").convertTo[String],
+         fields("name").convertTo[String],
+         fields("header").convertTo[String],
+         fields("purpose").convertTo[String],
+         new LocalDateTime(fields("last_post_at").convertTo[Long]),
+         fields("total_msg_count").convertTo[Long],
+         new LocalDateTime(fields("extra_update_at").convertTo[Long]),
+         fields("creator_id").convertTo[String]
+      )
+   }
 }
