@@ -26,7 +26,7 @@ import DefaultJsonProtocol._
   * @param display_name
   * @param name
   * @param _header
-  * @param purpose
+  * @param _purpose
   * @param last_post_at
   * @param total_msg_count
   * @param extra_update_at
@@ -41,14 +41,12 @@ case class Channel(id: String,
                    display_name: String,
                    name: String,
                    private var _header: String,
-                   purpose: String,
+                   private var _purpose: String,
                    last_post_at: LocalDateTime,
                    total_msg_count: Long,
                    extra_update_at: LocalDateTime,
                    creator_id: String)
 {
-   // TODO: set a header
-   // TODO set channel purpose
    // TODO: Invite others to this channel
    // TODO: List members
    // TODO leave channel
@@ -205,6 +203,19 @@ case class Channel(id: String,
       ).toJson
 
       RestUtils.post_query(session.client, s"api/v3/teams/${session.team.id}/channels/update_header", params)
+   }
+
+   def purpose = _purpose
+   def purpose_=(content: String)(implicit session: ClientSession)
+   {
+      _purpose = content
+
+      val params = Map(
+         "channel_purpose" -> content,
+         "channel_id" -> this.id
+      ).toJson
+
+      RestUtils.post_query(session.client, s"api/v3/teams/${session.team.id}/channels/update_purpose", params)
    }
 }
 
