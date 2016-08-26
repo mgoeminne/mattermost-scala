@@ -47,4 +47,34 @@ case class Team(  id: String,
      *         no channel corresponds.
      */
    def channel(name: String)(implicit session: ClientSession) = channels(name)(session).headOption
+
+   /**
+     * Tries to create a new channel for this team.
+     * @param name The name of the channel.
+     * @param slug The url slug associated to the channel. Must be unique among the team's channels.
+     * @param purpose A description of the channel purpose.
+     * @param open true if the channel is open, false otherwise.
+     * @return some channel if it has been created, none otherwise.
+     */
+   def create_channel(name: String, slug: String, purpose: String, open: Boolean)(implicit session: ClientSession) : Option[Channel] =
+   {
+      val params = Map(
+         "display_name" -> name,
+         "name" -> slug,
+         "purpose" -> purpose,
+         "type" -> (open match {
+            case true => "O"
+            case false => "P"
+         })
+      ).toJson.asJsObject
+
+      val ret = RestUtils.post_query(session.client, s"api/v3/teams/${session.team.id}/channels/create", params)
+
+      ret.asJsObject.fields.contains("status_code") match {
+         case true => None
+         case false => {
+            Some(Channel(ret.asJsObject))
+         }
+      }
+   }
 }
