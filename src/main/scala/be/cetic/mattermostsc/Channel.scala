@@ -139,4 +139,9 @@ case class Channel(id: String,
          case JsArray(l) => l.map(member => PartialProfile(member.asJsObject)(session))
       }
    }
+
+   /**
+     * @return true if this is a private (active) channel, false otherwise.
+     */
+   def is_private = this.`type` == "P"
 }
